@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aws-saas-multi-tenant-bedrock-accelerator"
+version = "1.0.0"
+description = "Production-Ready Multi-Tenant SaaS Blueprint with Amazon Bedrock, MCP & OpenTelemetry"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "Widad SAGHIR" }
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

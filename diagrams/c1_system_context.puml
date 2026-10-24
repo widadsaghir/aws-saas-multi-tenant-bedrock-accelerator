@@ -1,0 +1,43 @@
+@startuml c1_system_context
+skinparam defaultFontSize 16
+skinparam defaultFontColor #000000
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam ArrowColor #1E293B
+skinparam ArrowThickness 2
+
+title Diagramme C1 : Contexte Système — OmniDoc SaaS Platform (AWS ISV)
+
+rectangle "Utilisateurs Régulés\n(Santé & Avocats)" as UserRegulated #EFF6FF
+rectangle "Utilisateurs PME\n(Entreprises Standard)" as UserSME #F1F5F9
+
+rectangle "OmniDoc SaaS Platform\n[Système Logiciel ISV Cible]\nPlateforme d'automatisation documentaire multi-tenant\net d'ingénierie agentique" as OmniDocSystem #2563EB;line:1E40AF;text:FFFFFF
+
+rectangle "Amazon Bedrock (eu-west-3)\n[Système Externe AWS]\nInférence Claude 3.5 / Mistral en région souveraine\net Guardrails de sécurité" as BedrockSystem #F97316;line:C2410C;text:FFFFFF
+
+rectangle "AWS Key Management Service (KMS)\n[Système Externe AWS]\nChiffrement par clés dédiées (CMK) par tenant" as KmsSystem #10B981;line:047857;text:FFFFFF
+
+rectangle "Amazon CloudWatch & X-Ray\n[Système Externe AWS]\nObservabilité OpenTelemetry et métriques FinOps" as ObservabilitySystem #8B5CF6;line:6D28D9;text:FFFFFF
+
+UserRegulated --> OmniDocSystem : 1. Soumet contrats sensibles via API sécurisée mTLS
+UserSME --> OmniDocSystem : 2. Soumet documents courants via portail SaaS
+OmniDocSystem --> BedrockSystem : 3. Inférence agentique via AWS PrivateLink (sans transit Internet)
+OmniDocSystem --> KmsSystem : 4. Chiffrement/Déchiffrement enveloppe (Isolation Silo)
+OmniDocSystem --> ObservabilitySystem : 5. Émet traces OpenTelemetry et métriques de coût par tenant
+
+legend right
+  |= Type de Ligne |= Signification |
+  | <color:#1E293B>──></color> | Flux synchrone HTTPS / PrivateLink sécurisé |
+endlegend
+
+note bottom of OmniDocSystem
+  <b>FICHE D'EXPLICATION TECHNIQUE</b>
+  1. <b>Type de diagramme :</b> Diagramme de Contexte Système (C4 Niveau 1).
+  2. <b>Utilité :</b> Délimite le périmètre de la plateforme OmniDoc SaaS, ses utilisateurs et ses dépendances externes AWS.
+  3. <b>Standard suivi :</b> C4 Model (C1 Context).
+  4. <b>Équivalent UML :</b> Diagramme de Cas d'Utilisation / Diagramme de Paquetage étendu.
+  5. <b>Résumé :</b> Montre comment OmniDoc isole les flux régulés (santé/juridique) et standard, tout en interagissant de façon souveraine avec Bedrock, KMS et CloudWatch.
+end note
+
+@enduml

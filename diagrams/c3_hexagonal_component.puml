@@ -1,0 +1,67 @@
+@startuml c3_hexagonal_component
+skinparam defaultFontSize 16
+skinparam defaultFontColor #000000
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam ArrowColor #1E293B
+skinparam ArrowThickness 2
+
+title Diagramme C3 : Composants & Architecture Hexagonale — Core Engine
+
+package "Inbound Adapters\n(Entrée Driving)" as InboundPkg #EFF6FF {
+  class "FastApiDocumentController\n[Inbound Adapter]\nValide JWT, extrait tenant_id\net route la requête HTTP" as InboundController #DBEAFE
+}
+
+package "Core Domain (DDD Pure Logic)\n[Hexagone Métier — 0 Dépendance AWS]" as DomainPkg #FEF3C7 {
+  interface "AnalyzeContractUseCase\n[Driving Port / Inbound]\nContrat d'exécution de l'analyse" as InboundPort #FDE68A
+  
+  class "ContractAggregate\n[Root Entity]\nEncapsule clauses, statut\net validation juridique" as ContractEntity #F59E0B;text:FFFFFF
+  
+  class "TenantContext\n[Value Object]\nTenantId, Tier (Silo/Pool)\net Clé KMS associée" as TenantVO #F59E0B;text:FFFFFF
+
+  class "RiskEvaluationPolicy\n[Domain Service]\nRègle HITL : alerte si score < 85%" as PolicyService #F59E0B;text:FFFFFF
+}
+
+package "Outbound Ports\n(Interfaces SPI Pure)" as OutboundPortsPkg #FEF9C3 {
+  interface "AiAgentPort\n[Driven Port]\nInférence & MCP Tools" as AiPort #FDE68A
+  interface "DocumentRepositoryPort\n[Driven Port]\nPersistance abstraite" as RepoPort #FDE68A
+  interface "AuditTelemetryPort\n[Driven Port]\nÉmission traces OpenTelemetry" as TelemetryPort #FDE68A
+}
+
+package "Outbound Adapters\n(Sortie Driven — SDKs AWS)" as OutboundAdaptersPkg #F0FDF4 {
+  class "BedrockMcpAdapter\n[Driven Adapter]\nDé-identification PII locale,\nappel MCP tools et Bedrock" as BedrockAdapter #10B981;text:FFFFFF
+  
+  class "AuroraPostgresAdapter\n[Driven Adapter]\nRoutage dynamique Silo (schéma)\nou Pool (Row-Level Security)" as PostgresAdapter #059669;text:FFFFFF
+  
+  class "OpenTelemetryAdapter\n[Driven Adapter]\nCréation des Spans de raisonnement\net export CloudWatch / X-Ray" as OtelAdapter #047857;text:FFFFFF
+}
+
+InboundController --> InboundPort : 1. Invoque l'analyse
+InboundPort <|.. ContractEntity : Implémente
+ContractEntity *-- TenantVO : Possède
+ContractEntity --> PolicyService : Évalue risques
+ContractEntity --> AiPort : 2. Sollicite l'agent IA
+ContractEntity --> RepoPort : 3. Sauvegarde résultat
+ContractEntity --> TelemetryPort : 4. Trace le raisonnement
+
+AiPort <|.. BedrockAdapter : Implémente
+RepoPort <|.. PostgresAdapter : Implémente
+TelemetryPort <|.. OtelAdapter : Implémente
+
+legend right
+  |= Type de Relation |= Signification |
+  | <color:#1E293B>──></color> | Dépendance / Appel de méthode |
+  | <color:#1E293B>..|></color> | Implémentation d'interface (Port) |
+endlegend
+
+note bottom of DomainPkg
+  <b>FICHE D'EXPLICATION TECHNIQUE</b>
+  1. <b>Type de diagramme :</b> Diagramme de Composants & Architecture Hexagonale (C4 Niveau 3).
+  2. <b>Utilité :</b> Prouve l'indépendance totale du code métier vis-à-vis des SDKs AWS (Clean Architecture).
+  3. <b>Standard suivi :</b> C4 Model (C3 Component) & Ports & Adapters d'Alistair Cockburn.
+  4. <b>Équivalent UML :</b> Diagramme de Composants / Diagramme de Classes de Conception.
+  5. <b>Résumé :</b> Le Core Domain ne dépend d'aucun SDK. Bedrock, Aurora et OpenTelemetry ne sont que des adaptateurs périphériques interchangeables, garantissant 100% de testabilité déterministe en TDD.
+end note
+
+@enduml

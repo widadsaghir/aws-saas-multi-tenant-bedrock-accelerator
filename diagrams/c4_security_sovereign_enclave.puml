@@ -1,0 +1,46 @@
+@startuml c4_security_sovereign_enclave
+skinparam defaultFontSize 16
+skinparam defaultFontColor #000000
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam ArrowColor #1E293B
+skinparam ArrowThickness 2
+
+title Diagramme de Sécurité : Enclave Souveraine & Zero-Trust (AWS Bedrock)
+
+rectangle "Contrat Non Cavardé\n(Données Sensibles de Santé)" as RawDoc #EFF6FF
+
+rectangle "Pod EKS Sécurisé (VPC Privé eu-west-3)\n[Frontière de Confiance Étanche]" as PodBox #F8FAFC {
+  rectangle "Local PII Sanitizer\n[Algorithme Déterministe 0 Token]\nMasquage regex & NLP local des NIR,\nnoms, IBAN et adresses" as PiiSanitizer #DC2626;text:FFFFFF
+  
+  rectangle "Payload Nettoyé & Pseudonymisé\n[Texte Anonymisé avec Tokens Déterministes]" as CleanPayload #FDE047
+}
+
+rectangle "AWS PrivateLink (Interface VPC Endpoint)\n[Canal Réseau Dédié Sans Transit Internet]" as PrivateLink #2563EB;text:FFFFFF
+
+rectangle "Amazon Bedrock (Région Paris eu-west-3)\n[Enclave IA Managée & Certifiée HDS / RGPD]" as BedrockBox #F97316;text:FFFFFF {
+  rectangle "Bedrock Guardrails\n• Filtre anti-prompt injection\n• Blocage fuite PII résiduelle\n• Filtre de toxicité" as Guardrails #EA580C;text:FFFFFF
+  
+  rectangle "Modèle de Fondation\n(Claude 3.5 Sonnet / Mistral Large)\n[Zéro Rétention / Zéro Réentraînement]" as FoundationModel #C2410C;text:FFFFFF
+}
+
+rectangle "AWS KMS\n[Clé CMK Dédiée Tenant]\nChiffrement de l'analyse produite" as KmsKey #059669;text:FFFFFF
+
+RawDoc --> PiiSanitizer : 1. Document soumis dans le pod
+PiiSanitizer --> CleanPayload : 2. Données PII caviardées localement
+CleanPayload --> PrivateLink : 3. Émission via VPC Endpoint (Pas d'Internet)
+PrivateLink --> Guardrails : 4. Contrôle de sécurité en couche 7
+Guardrails --> FoundationModel : 5. Inférence pure sécurisée
+FoundationModel --> KmsKey : 6. Chiffrement enveloppe du résultat d'analyse
+
+note bottom of PodBox
+  <b>FICHE D'EXPLICATION TECHNIQUE</b>
+  1. <b>Type de diagramme :</b> Diagramme de Sécurité & Modélisation de Menaces (Threat Model STRIDE).
+  2. <b>Utilité :</b> Garantit aux CTOs santé/juridique qu'aucune donnée nominative ne quitte le conteneur client.
+  3. <b>Standard suivi :</b> Pattern Zero-Trust Sovereign Enclave & AWS Well-Architected Security Pillar.
+  4. <b>Équivalent UML :</b> Diagramme d'Activité / Diagramme de Flux de Données Sécurisé.
+  5. <b>Résumé :</b> Démontre la double protection : désensibilisation locale préalable (0 token) + transit exclusif par AWS PrivateLink vers Bedrock Paris, éliminant tout risque de fuite de données ou de prompt injection.
+end note
+
+@enduml

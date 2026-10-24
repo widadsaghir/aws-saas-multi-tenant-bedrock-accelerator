@@ -1,0 +1,55 @@
+@startuml c2_container_architecture
+skinparam defaultFontSize 16
+skinparam defaultFontColor #000000
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam ArrowColor #1E293B
+skinparam ArrowThickness 2
+
+title Diagramme C2 : Architecture des Conteneurs — OmniDoc SaaS Platform
+
+rectangle "Utilisateur / Client API" as Client #F1F5F9
+
+rectangle "Front Door & Edge Security\n[AWS Edge]" as EdgeBox #EFF6FF {
+  rectangle "Amazon CloudFront & AWS WAF\n[Réseau & Sécurité L7]\nCache statique et protection anti-injection SQL / XSS" as WAF
+}
+
+rectangle "VPC OmniDoc (eu-west-3 Paris)\n[Réseau Isolé Privé]" as VpcBox #F8FAFC {
+  rectangle "AWS Application Load Balancer\n[ALB - Routage L7]\nTerminaison TLS et injection Tenant Context" as ALB #CBD5E1
+
+  rectangle "Cluster Amazon EKS (Fargate / Graviton)\n[Compute Conteneurisé]" as EksBox #E2E8F0 {
+    rectangle "Document Service Pods\n[FastAPI / Hexagonal]\nIngestion, extraction et règles métier" as DocPods #2563EB;text:FFFFFF
+    rectangle "Agentic Orchestrator Pods\n[MCP Client & PII Sanitizer]\nDé-identification locale et orchestration MCP" as AgentPods #1D4ED8;text:FFFFFF
+    rectangle "OpenTelemetry Collector\n[Daemon]\nCollecte des traces de raisonnement et spans" as OtelCollector #7C3AED;text:FFFFFF
+  }
+
+  rectangle "Amazon Aurora Serverless v2\n[PostgreSQL Managé]\n• Silo : Schémas dédiés (KMS CMK)\n• Pool : Tables partagées RLS" as AuroraDB #059669;text:FFFFFF
+  rectangle "Amazon S3 (Bucket Chiffré)\n[Stockage Objets]\nDocuments bruts et contrats originaux" as S3Bucket #047857;text:FFFFFF
+}
+
+rectangle "Amazon Bedrock (eu-west-3)\n[IA Managée via AWS PrivateLink]\nClaude 3.5 Sonnet / Mistral + Guardrails" as Bedrock #F97316;text:FFFFFF
+rectangle "Amazon CloudWatch & AWS X-Ray\n[Observabilité & FinOps]\nTraces distribuées et métriques de coût" as CloudWatch #8B5CF6;text:FFFFFF
+
+Client --> WAF : 1. Requête HTTPS / mTLS
+WAF --> ALB : 2. Trafic filtré L7
+ALB --> DocPods : 3. Route avec JWT claim tenant_id
+DocPods --> S3Bucket : 4. Stocke contrat (KMS enveloppe)
+DocPods --> AgentPods : 5. Déclenche analyse contractuelle
+AgentPods --> DocPods : 6. Valide PII locale (0 token)
+AgentPods --> Bedrock : 7. Inférence sécurisée via PrivateLink
+DocPods --> AuroraDB : 8. Persistance (Schéma Silo ou Table Pool)
+DocPods --> OtelCollector : 9. Émet spans d'exécution
+AgentPods --> OtelCollector : 10. Émet traces de raisonnement MCP
+OtelCollector --> CloudWatch : 11. Exporte traces X-Ray & métriques
+
+note bottom of EksBox
+  <b>FICHE D'EXPLICATION TECHNIQUE</b>
+  1. <b>Type de diagramme :</b> Diagramme de Conteneurs (C4 Niveau 2).
+  2. <b>Utilité :</b> Décompose la plateforme en briques exécutables (ALB, pods EKS, bases Aurora, Bedrock).
+  3. <b>Standard suivi :</b> C4 Model (C2 Container).
+  4. <b>Équivalent UML :</b> Diagramme de Déploiement / Diagramme de Composants système.
+  5. <b>Résumé :</b> Illustre la séparation nette entre le compute conteneurisé mutualisé (Pool), la persistance hybride (Silo/Pool) et l'enclave d'inférence souveraine Bedrock via PrivateLink.
+end note
+
+@enduml
