@@ -1,0 +1,28 @@
+flowchart TD
+    %% C1: System Context Diagram — OmniDoc SaaS Platform
+    subgraph Users ["Users"]
+        UserRegulated["Regulated Users<br/>(Healthcare and Legal)"]
+        UserSME["Standard Users<br/>(B2B SMEs)"]
+    end
+
+    OmniDoc["OmniDoc SaaS Platform<br/>Multi-Tenant Document Automation<br/>and Sovereign Agentic AI"]
+
+    subgraph AWS_Cloud ["AWS Paris Region (eu-west-3)"]
+        Bedrock["Amazon Bedrock<br/>Claude 3.5 Sonnet and Guardrails"]
+        KMS["AWS KMS<br/>Dedicated CMK per Tenant"]
+        CloudWatch["Amazon CloudWatch and X-Ray<br/>OpenTelemetry and FinOps Metrics"]
+    end
+
+    UserRegulated -->|1. mTLS Secure Ingestion| OmniDoc
+    UserSME -->|2. Standard SaaS Portal| OmniDoc
+    OmniDoc -->|3. Inbound PrivateLink| Bedrock
+    OmniDoc -->|4. Envelope Encryption| KMS
+    OmniDoc -->|5. Telemetry Spans and Costs| CloudWatch
+
+    classDef primary fill:#2563EB,stroke:#1E40AF,stroke-width:2px,color:#FFFFFF;
+    classDef secondary fill:#EFF6FF,stroke:#3B82F6,stroke-width:1px,color:#1E293B;
+    classDef aws fill:#F97316,stroke:#C2410C,stroke-width:2px,color:#FFFFFF;
+
+    class OmniDoc primary;
+    class UserRegulated,UserSME secondary;
+    class Bedrock,KMS,CloudWatch aws;

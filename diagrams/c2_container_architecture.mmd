@@ -1,0 +1,47 @@
+flowchart TD
+    %% C2: Container Architecture Diagram — OmniDoc SaaS Platform
+    Client["Client / API Consumer"]
+    
+    subgraph Edge ["Front Door and Edge Security"]
+        WAF["Amazon CloudFront and AWS WAF<br/>Layer 7 Security"]
+    end
+
+    subgraph VPC ["OmniDoc Private VPC (eu-west-3)"]
+        ALB["AWS Application Load Balancer<br/>JWT Tenant Context Injection"]
+        
+        subgraph EKS ["Amazon EKS Cluster (Fargate / Graviton)"]
+            DocPods["Document Service Pods<br/>FastAPI / Hexagonal Core"]
+            AgentPods["Agentic MCP Pods<br/>Local PII Masker and MCP Runner"]
+            OtelCollector["OpenTelemetry Collector<br/>Traces and Metrics Daemon"]
+        end
+        
+        Aurora["Amazon Aurora Serverless v2<br/>- Silo: Dedicated Schemas (KMS)<br/>- Pool: Shared Tables (RLS)"]
+        S3["Amazon S3 Bucket<br/>Encrypted Raw Vault"]
+    end
+
+    subgraph AWS_Services ["AWS Managed Sovereign Enclave"]
+        Bedrock["Amazon Bedrock (PrivateLink)<br/>Claude 3.5 and Guardrails"]
+        CloudWatch["CloudWatch and X-Ray<br/>Distributed Telemetry"]
+    end
+
+    Client -->|1. HTTPS| WAF
+    WAF -->|2. Filtered Traffic| ALB
+    ALB -->|3. Route with Tenant Context| DocPods
+    DocPods -->|4. Store Raw| S3
+    DocPods -->|5. Trigger MCP Analysis| AgentPods
+    AgentPods -->|6. Local PII Masking| AgentPods
+    AgentPods -->|7. AWS PrivateLink| Bedrock
+    DocPods -->|8. Persist Result| Aurora
+    DocPods -->|9. Spans| OtelCollector
+    AgentPods -->|10. Reasoning Traces| OtelCollector
+    OtelCollector -->|11. Export| CloudWatch
+
+    classDef edge fill:#EFF6FF,stroke:#3B82F6,stroke-width:1px;
+    classDef compute fill:#2563EB,stroke:#1E40AF,stroke-width:2px,color:#FFFFFF;
+    classDef db fill:#059669,stroke:#047857,stroke-width:2px,color:#FFFFFF;
+    classDef aws fill:#F97316,stroke:#C2410C,stroke-width:2px,color:#FFFFFF;
+
+    class WAF,ALB edge;
+    class DocPods,AgentPods,OtelCollector compute;
+    class Aurora,S3 db;
+    class Bedrock,CloudWatch aws;

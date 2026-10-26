@@ -1,0 +1,43 @@
+<mxfile host="Electron" modified="2026-10-24T18:00:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram id="c1_system_context" name="C1 System Context">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="user1" value="Utilisateurs Régulés&#xa;(Santé &amp; Avocats)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;strokeWidth=2;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="80" y="160" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="user2" value="Utilisateurs PME&#xa;(Entreprises Standard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;strokeWidth=2;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="80" y="320" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="system" value="OmniDoc SaaS Platform&#xa;[Système Logiciel ISV]&#xa;Gestion Documentaire Multi-Tenant &amp; Agents IA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2563EB;strokeColor=#1E40AF;strokeWidth=2;fontColor=#FFFFFF;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="380" y="200" width="280" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="bedrock" value="Amazon Bedrock (eu-west-3)&#xa;[Service AWS Souverain]&#xa;Inférence Claude 3.5 &amp; Guardrails" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F97316;strokeColor=#C2410C;strokeWidth=2;fontColor=#FFFFFF;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="780" y="120" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="kms" value="AWS KMS&#xa;[Service AWS]&#xa;Clés CMK par Tenant" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#10B981;strokeColor=#047857;strokeWidth=2;fontColor=#FFFFFF;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="780" y="240" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cw" value="Amazon CloudWatch &amp; X-Ray&#xa;[Service AWS]&#xa;Traces OpenTelemetry &amp; FinOps" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8B5CF6;strokeColor=#6D28D9;strokeWidth=2;fontColor=#FFFFFF;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="780" y="360" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="mTLS / Contrats" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;strokeColor=#1E293B;strokeWidth=2;" edge="1" parent="1" source="user1" target="system">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="Portail SaaS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;strokeColor=#1E293B;strokeWidth=2;" edge="1" parent="1" source="user2" target="system">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="PrivateLink" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#1E293B;strokeWidth=2;" edge="1" parent="1" source="system" target="bedrock">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="KMS Enveloppe" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#1E293B;strokeWidth=2;" edge="1" parent="1" source="system" target="kms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="OpenTelemetry" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#1E293B;strokeWidth=2;" edge="1" parent="1" source="system" target="cw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

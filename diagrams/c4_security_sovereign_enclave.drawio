@@ -1,0 +1,41 @@
+<mxfile host="Electron" modified="2026-10-24T18:00:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram id="c4_security" name="C4 Security Sovereign Enclave">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="raw" value="Contrat Brut&#xa;(Données Sensibles Santé)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="220" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="pod" value="Pod EKS (VPC Privé eu-west-3)" style="swimlane;fillColor=#F8FAFC;strokeColor=#2563EB;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="240" y="140" width="260" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="sanitizer" value="Local PII Sanitizer&#xa;• Détection Regex/NLP&#xa;• Caviardage 0 Token" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DC2626;strokeColor=#991B1B;fontColor=#FFFFFF;fontStyle=1;fontSize=12;" vertex="1" parent="pod">
+          <mxGeometry x="20" y="40" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="clean" value="Payload Nettoyé &amp; Pseudonymisé&#xa;[Zéro Donnée Nominative]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE047;strokeColor=#CA8A04;fontStyle=1;fontSize=12;" vertex="1" parent="pod">
+          <mxGeometry x="20" y="130" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="privatelink" value="AWS PrivateLink&#xa;[VPC Endpoint]&#xa;Zéro Transit Internet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2563EB;strokeColor=#1D4ED8;fontColor=#FFFFFF;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="540" y="215" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bedrock_box" value="Amazon Bedrock (Paris eu-west-3)" style="swimlane;fillColor=#FFF7ED;strokeColor=#EA580C;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="740" y="140" width="260" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="guardrails" value="Bedrock Guardrails&#xa;• Anti-Prompt Injection&#xa;• Filtre de Toxicité" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EA580C;strokeColor=#C2410C;fontColor=#FFFFFF;fontStyle=1;fontSize=12;" vertex="1" parent="bedrock_box">
+          <mxGeometry x="20" y="40" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="model" value="Claude 3.5 Sonnet / Mistral&#xa;[Zéro Réentraînement]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C2410C;strokeColor=#9A3412;fontColor=#FFFFFF;fontStyle=1;fontSize=12;" vertex="1" parent="bedrock_box">
+          <mxGeometry x="20" y="130" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="kms" value="AWS KMS&#xa;[Clé CMK Dédiée Tenant]&#xa;Chiffrement Enveloppe" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#059669;strokeColor=#047857;fontColor=#FFFFFF;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="215" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" edge="1" parent="1" source="raw" target="sanitizer" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+        <mxCell id="s2" edge="1" parent="1" source="clean" target="privatelink" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+        <mxCell id="s3" edge="1" parent="1" source="privatelink" target="guardrails" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+        <mxCell id="s4" edge="1" parent="1" source="model" target="kms" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

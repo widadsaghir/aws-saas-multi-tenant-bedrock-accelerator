@@ -1,0 +1,50 @@
+flowchart LR
+    %% C3: Hexagonal Component Architecture — Core Engine
+    subgraph Inbound ["Inbound Adapters (Driving)"]
+        FastApiCtrl["FastAPI Document Controller<br/>- JWT Tenant Context Validation<br/>- POST /api/v1/contracts/analyze"]
+    end
+
+    subgraph Core ["Hexagonal Core Domain (Pure Logic - 0 AWS SDK)"]
+        UseCase["AnalyzeContractUseCase<br/>Domain Orchestration Engine"]
+        Aggregate["ContractAggregate<br/>Domain Entity and Risk Evaluation"]
+        TenantVO["TenantContext (Value Object)<br/>- tenant_id<br/>- tier (SILO / POOL)<br/>- kms_key_arn"]
+        Policy["RiskEvaluationPolicy<br/>Rule: Risk under 15% (Auto Approval)"]
+    end
+
+    subgraph Ports ["Driven SPI Ports (Interfaces)"]
+        PiiPort["PiiSanitizerPort<br/>(SPI Interface)"]
+        AiPort["AiAgentPort<br/>(SPI Interface)"]
+        RepoPort["DocumentRepositoryPort<br/>(SPI Interface)"]
+        OtelPort["AuditTelemetryPort<br/>(SPI Interface)"]
+    end
+
+    subgraph Outbound ["Outbound Adapters (Driven AWS Integrations)"]
+        SanitizerAdapter["RegexPiiSanitizerAdapter<br/>Deterministic Local 0-Token Engine"]
+        BedrockAdapter["BedrockMcpAdapter<br/>Claude 3.5 and MCP Tool Runner"]
+        AuroraAdapter["InMemory / AuroraPostgresAdapter<br/>- Silo: Dedicated Schema<br/>- Pool: Shared Table RLS"]
+        OtelAdapter["OpenTelemetryAdapter<br/>- Distributed Reasoning Spans<br/>- FinOps Tenant Cost Attribution"]
+    end
+
+    FastApiCtrl -->|1. Invokes| UseCase
+    UseCase --> Aggregate
+    Aggregate --> TenantVO
+    Aggregate --> Policy
+    UseCase -->|2. Sanitize| PiiPort
+    UseCase -->|3. AI Inference| AiPort
+    UseCase -->|4. Persist| RepoPort
+    UseCase -->|5. Telemetry| OtelPort
+
+    PiiPort -.->|Implements| SanitizerAdapter
+    AiPort -.->|Implements| BedrockAdapter
+    RepoPort -.->|Implements| AuroraAdapter
+    OtelPort -.->|Implements| OtelAdapter
+
+    classDef inbound fill:#DBEAFE,stroke:#2563EB,stroke-width:2px,color:#1E3A8A;
+    classDef core fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#78350F;
+    classDef ports fill:#FEF9C3,stroke:#CA8A04,stroke-width:2px,color:#713F12;
+    classDef outbound fill:#D1FAE5,stroke:#059669,stroke-width:2px,color:#064E3B;
+
+    class FastApiCtrl inbound;
+    class UseCase,Aggregate,TenantVO,Policy core;
+    class PiiPort,AiPort,RepoPort,OtelPort ports;
+    class SanitizerAdapter,BedrockAdapter,AuroraAdapter,OtelAdapter outbound;

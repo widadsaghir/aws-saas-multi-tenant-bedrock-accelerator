@@ -1,0 +1,42 @@
+flowchart TD
+    %% C4: Security and Sovereign Enclave Diagram — Zero-Trust Bedrock
+    subgraph ClientZone ["Client Boundary"]
+        RawDoc["Raw Sensitive Contract<br/>(Healthcare Data / NIR / PII / Legal)"]
+    end
+
+    subgraph EKSPod ["Isolated Amazon EKS Pod (Private VPC eu-west-3)"]
+        Sanitizer["Local PII Sanitizer<br/>Deterministic Regex 0-Token Engine<br/>- Masks French NIR, IBAN, Phone, Email"]
+        CleanDoc["Sanitized Payload<br/>(PII_NIR_REDACTED) and Pseudonyms"]
+    end
+
+    subgraph Network ["AWS Private Backbone (Zero Public Internet Transit)"]
+        PrivateLink["AWS PrivateLink Interface VPC Endpoint<br/>Private DNS (eu-west-3)"]
+    end
+
+    subgraph SovereignEnclave ["Amazon Bedrock Sovereign Enclave (Paris)"]
+        Guardrails["Bedrock Guardrails<br/>- Anti-Prompt Injection<br/>- PII Leak Prevention<br/>- Content Filtering"]
+        FoundationModel["Claude 3.5 Sonnet / Mistral Large<br/>- Zero Data Retention Policy<br/>- No Model Retraining"]
+    end
+
+    subgraph KMSZone ["AWS Key Management Service"]
+        KMS["Dedicated Tenant CMK<br/>Envelope Encryption at Rest"]
+    end
+
+    RawDoc -->|1. Ingestion| Sanitizer
+    Sanitizer -->|2. Zero-Token Redaction| CleanDoc
+    CleanDoc -->|3. Transit via PrivateLink| PrivateLink
+    PrivateLink -->|4. L7 Security Inspection| Guardrails
+    Guardrails -->|5. Sovereign Inference| FoundationModel
+    FoundationModel -->|6. Encrypt Analysis Result| KMS
+
+    classDef danger fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#991B1B;
+    classDef safe fill:#FEF9C3,stroke:#CA8A04,stroke-width:2px,color:#713F12;
+    classDef network fill:#DBEAFE,stroke:#2563EB,stroke-width:2px,color:#1E3A8A;
+    classDef bedrock fill:#FFEDD5,stroke:#EA580C,stroke-width:2px,color:#9A3412;
+    classDef kms fill:#D1FAE5,stroke:#059669,stroke-width:2px,color:#064E3B;
+
+    class RawDoc danger;
+    class Sanitizer,CleanDoc safe;
+    class PrivateLink network;
+    class Guardrails,FoundationModel bedrock;
+    class KMS kms;

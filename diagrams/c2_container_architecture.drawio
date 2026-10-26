@@ -1,0 +1,47 @@
+<mxfile host="Electron" modified="2026-10-24T18:00:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram id="c2_container" name="C2 Container Architecture">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="client" value="Client / Utilisateur" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#64748B;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="40" y="240" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="waf" value="CloudFront &amp; WAF&#xa;[Edge Security L7]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="230" y="240" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="alb" value="Application Load Balancer&#xa;[Routage &amp; JWT Tenant]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CBD5E1;strokeColor=#475569;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="430" y="240" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="eks" value="Cluster Amazon EKS (Compute)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#2563EB;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="660" y="120" width="260" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="docpod" value="Document Service Pod&#xa;[FastAPI / Hexagonal]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2563EB;strokeColor=#1E40AF;fontColor=#FFFFFF;fontStyle=1;fontSize=12;" vertex="1" parent="eks">
+          <mxGeometry x="20" y="40" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="agentpod" value="Agentic MCP Pod&#xa;[PII Masker &amp; Reasoning]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1D4ED8;strokeColor=#1E40AF;fontColor=#FFFFFF;fontStyle=1;fontSize=12;" vertex="1" parent="eks">
+          <mxGeometry x="20" y="130" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="otel" value="OpenTelemetry Collector&#xa;[Daemon Traces &amp; Metrics]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7C3AED;strokeColor=#5B21B6;fontColor=#FFFFFF;fontStyle=1;fontSize=12;" vertex="1" parent="eks">
+          <mxGeometry x="20" y="220" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="aurora" value="Amazon Aurora v2&#xa;[PostgreSQL Managé]&#xa;Silo (KMS) &amp; Pool (RLS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#059669;strokeColor=#047857;fontColor=#FFFFFF;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="970" y="140" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="bedrock" value="Amazon Bedrock&#xa;[PrivateLink eu-west-3]&#xa;Claude 3.5 &amp; Guardrails" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F97316;strokeColor=#C2410C;fontColor=#FFFFFF;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="970" y="260" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cw" value="CloudWatch &amp; X-Ray&#xa;[Observabilité FinOps]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8B5CF6;strokeColor=#6D28D9;fontColor=#FFFFFF;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="970" y="380" width="170" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" edge="1" parent="1" source="client" target="waf" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+        <mxCell id="c2" edge="1" parent="1" source="waf" target="alb" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+        <mxCell id="c3" edge="1" parent="1" source="alb" target="docpod" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+        <mxCell id="c4" edge="1" parent="1" source="docpod" target="agentpod" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+        <mxCell id="c5" edge="1" parent="1" source="docpod" target="aurora" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+        <mxCell id="c6" edge="1" parent="1" source="agentpod" target="bedrock" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+        <mxCell id="c7" edge="1" parent="1" source="otel" target="cw" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1E293B;strokeWidth=2;" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

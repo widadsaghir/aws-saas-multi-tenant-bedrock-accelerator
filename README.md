@@ -55,24 +55,24 @@ Modern Independent Software Vendors (ISVs) transitioning from legacy single-tena
 ### 1. C1 — System Context Diagram
 ```mermaid
 flowchart TD
-    subgraph Users [Users]
-        UserRegulated["Regulated Users<br/>(Healthcare & Legal)"]
+    subgraph Users ["Users"]
+        UserRegulated["Regulated Users<br/>(Healthcare and Legal)"]
         UserSME["Standard Users<br/>(B2B SMEs)"]
     end
 
-    OmniDoc["OmniDoc SaaS Platform<br/>Multi-Tenant Document Automation<br/>& Sovereign Agentic AI"]
+    OmniDoc["OmniDoc SaaS Platform<br/>Multi-Tenant Document Automation<br/>and Sovereign Agentic AI"]
 
-    subgraph AWS_Cloud [AWS Paris Region (eu-west-3)]
-        Bedrock["Amazon Bedrock<br/>Claude 3.5 Sonnet & Guardrails"]
+    subgraph AWS_Cloud ["AWS Paris Region (eu-west-3)"]
+        Bedrock["Amazon Bedrock<br/>Claude 3.5 Sonnet and Guardrails"]
         KMS["AWS KMS<br/>Dedicated CMK per Tenant"]
-        CloudWatch["Amazon CloudWatch & X-Ray<br/>OpenTelemetry & FinOps Metrics"]
+        CloudWatch["Amazon CloudWatch and X-Ray<br/>OpenTelemetry and FinOps Metrics"]
     end
 
     UserRegulated -->|1. mTLS Secure Ingestion| OmniDoc
     UserSME -->|2. Standard SaaS Portal| OmniDoc
     OmniDoc -->|3. Inbound PrivateLink| Bedrock
     OmniDoc -->|4. Envelope Encryption| KMS
-    OmniDoc -->|5. Telemetry Spans & Costs| CloudWatch
+    OmniDoc -->|5. Telemetry Spans and Costs| CloudWatch
 ```
 
 ### 2. C2 — Container Architecture Diagram
@@ -80,8 +80,8 @@ flowchart TD
 flowchart TD
     Client["Client / API Consumer"]
     
-    subgraph Edge ["Front Door & Edge Security"]
-        WAF["Amazon CloudFront & AWS WAF<br/>Layer 7 Security"]
+    subgraph Edge ["Front Door and Edge Security"]
+        WAF["Amazon CloudFront and AWS WAF<br/>Layer 7 Security"]
     end
 
     subgraph VPC ["OmniDoc Private VPC (eu-west-3)"]
@@ -89,17 +89,17 @@ flowchart TD
         
         subgraph EKS ["Amazon EKS Cluster (Fargate / Graviton)"]
             DocPods["Document Service Pods<br/>FastAPI / Hexagonal Core"]
-            AgentPods["Agentic MCP Pods<br/>Local PII Masker & MCP Runner"]
-            OtelCollector["OpenTelemetry Collector<br/>Traces & Metrics Daemon"]
+            AgentPods["Agentic MCP Pods<br/>Local PII Masker and MCP Runner"]
+            OtelCollector["OpenTelemetry Collector<br/>Traces and Metrics Daemon"]
         end
         
-        Aurora["Amazon Aurora Serverless v2<br/>• Silo: Dedicated Schemas (KMS)<br/>• Pool: Shared Tables (RLS)"]
+        Aurora["Amazon Aurora Serverless v2<br/>- Silo: Dedicated Schemas (KMS)<br/>- Pool: Shared Tables (RLS)"]
         S3["Amazon S3 Bucket<br/>Encrypted Raw Vault"]
     end
 
     subgraph AWS_Services ["AWS Managed Sovereign Enclave"]
-        Bedrock["Amazon Bedrock (PrivateLink)<br/>Claude 3.5 & Guardrails"]
-        CloudWatch["CloudWatch & X-Ray<br/>Distributed Telemetry"]
+        Bedrock["Amazon Bedrock (PrivateLink)<br/>Claude 3.5 and Guardrails"]
+        CloudWatch["CloudWatch and X-Ray<br/>Distributed Telemetry"]
     end
 
     Client -->|1. HTTPS| WAF
@@ -107,7 +107,7 @@ flowchart TD
     ALB -->|3. Route with Tenant Context| DocPods
     DocPods -->|4. Store Raw| S3
     DocPods -->|5. Trigger MCP Analysis| AgentPods
-    AgentPods -->|6. Local PII Sanitization| AgentPods
+    AgentPods -->|6. Local PII Masking| AgentPods
     AgentPods -->|7. AWS PrivateLink| Bedrock
     DocPods -->|8. Persist Result| Aurora
     DocPods -->|9. Spans| OtelCollector
@@ -119,43 +119,43 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph Inbound ["Inbound Adapters (Driving)"]
-        FastApiCtrl["FastAPI Document Controller<br/>• JWT Tenant Context Validation<br/>• POST /api/v1/contracts/analyze"]
+        FastApiCtrl["FastAPI Document Controller<br/>- JWT Tenant Context Validation<br/>- POST /api/v1/contracts/analyze"]
     end
 
     subgraph Core ["Hexagonal Core Domain (Pure Logic - 0 AWS SDK)"]
         UseCase["AnalyzeContractUseCase<br/>Domain Orchestration Engine"]
-        Aggregate["ContractAggregate<br/>Domain Entity & Risk Evaluation"]
-        TenantVO["TenantContext (Value Object)<br/>• tenant_id<br/>• tier (SILO / POOL)<br/>• kms_key_arn"]
-        Policy["RiskEvaluationPolicy<br/>Rule: Risk < 15% -> Auto Approval"]
+        Aggregate["ContractAggregate<br/>Domain Entity and Risk Evaluation"]
+        TenantVO["TenantContext (Value Object)<br/>- tenant_id<br/>- tier (SILO / POOL)<br/>- kms_key_arn"]
+        Policy["RiskEvaluationPolicy<br/>Rule: Risk under 15% (Auto Approval)"]
     end
 
     subgraph Ports ["Driven SPI Ports (Interfaces)"]
-        PiiPort["PiiSanitizerPort<br/>&lt;&lt;interface&gt;&gt;"]
-        AiPort["AiAgentPort<br/>&lt;&lt;interface&gt;&gt;"]
-        RepoPort["DocumentRepositoryPort<br/>&lt;&lt;interface&gt;&gt;"]
-        OtelPort["AuditTelemetryPort<br/>&lt;&lt;interface&gt;&gt;"]
+        PiiPort["PiiSanitizerPort<br/>(SPI Interface)"]
+        AiPort["AiAgentPort<br/>(SPI Interface)"]
+        RepoPort["DocumentRepositoryPort<br/>(SPI Interface)"]
+        OtelPort["AuditTelemetryPort<br/>(SPI Interface)"]
     end
 
     subgraph Outbound ["Outbound Adapters (Driven AWS Integrations)"]
         SanitizerAdapter["RegexPiiSanitizerAdapter<br/>Deterministic Local 0-Token Engine"]
-        BedrockAdapter["BedrockMcpAdapter<br/>Claude 3.5 & MCP Tool Runner"]
-        AuroraAdapter["InMemory / AuroraPostgresAdapter<br/>• Silo: Dedicated Schema<br/>• Pool: Shared Table RLS"]
-        OtelAdapter["OpenTelemetryAdapter<br/>• Distributed Reasoning Spans<br/>• FinOps Tenant Cost Attribution"]
+        BedrockAdapter["BedrockMcpAdapter<br/>Claude 3.5 and MCP Tool Runner"]
+        AuroraAdapter["InMemory / AuroraPostgresAdapter<br/>- Silo: Dedicated Schema<br/>- Pool: Shared Table RLS"]
+        OtelAdapter["OpenTelemetryAdapter<br/>- Distributed Reasoning Spans<br/>- FinOps Tenant Cost Attribution"]
     end
 
-    FastApiCtrl -->|1. Invoque| UseCase
+    FastApiCtrl -->|1. Invokes| UseCase
     UseCase --> Aggregate
     Aggregate --> TenantVO
     Aggregate --> Policy
     UseCase -->|2. Sanitize| PiiPort
-    UseCase -->|3. Inférence IA| AiPort
-    UseCase -->|4. Persistance| RepoPort
-    UseCase -->|5. Observabilité| OtelPort
+    UseCase -->|3. AI Inference| AiPort
+    UseCase -->|4. Persist| RepoPort
+    UseCase -->|5. Telemetry| OtelPort
 
-    PiiPort -.->|Implémente| SanitizerAdapter
-    AiPort -.->|Implémente| BedrockAdapter
-    RepoPort -.->|Implémente| AuroraAdapter
-    OtelPort -.->|Implémente| OtelAdapter
+    PiiPort -.->|Implements| SanitizerAdapter
+    AiPort -.->|Implements| BedrockAdapter
+    RepoPort -.->|Implements| AuroraAdapter
+    OtelPort -.->|Implements| OtelAdapter
 ```
 
 ### 4. C4 — Security & Sovereign Enclave Diagram (Zero-Trust Bedrock)
@@ -166,8 +166,8 @@ flowchart TD
     end
 
     subgraph EKSPod ["Isolated Amazon EKS Pod (Private VPC eu-west-3)"]
-        Sanitizer["Local PII Sanitizer<br/>Deterministic Regex 0-Token Engine<br/>• Masks French NIR, IBAN, Phone, Email"]
-        CleanDoc["Sanitized Payload<br/>[PII_NIR_REDACTED] & Pseudonyms"]
+        Sanitizer["Local PII Sanitizer<br/>Deterministic Regex 0-Token Engine<br/>- Masks French NIR, IBAN, Phone, Email"]
+        CleanDoc["Sanitized Payload<br/>(PII_NIR_REDACTED) and Pseudonyms"]
     end
 
     subgraph Network ["AWS Private Backbone (Zero Public Internet Transit)"]
@@ -175,8 +175,8 @@ flowchart TD
     end
 
     subgraph SovereignEnclave ["Amazon Bedrock Sovereign Enclave (Paris)"]
-        Guardrails["Bedrock Guardrails<br/>• Anti-Prompt Injection<br/>• PII Leak Prevention<br/>• Content Filtering"]
-        FoundationModel["Claude 3.5 Sonnet / Mistral Large<br/>• Zero Data Retention Policy<br/>• No Model Retraining"]
+        Guardrails["Bedrock Guardrails<br/>- Anti-Prompt Injection<br/>- PII Leak Prevention<br/>- Content Filtering"]
+        FoundationModel["Claude 3.5 Sonnet / Mistral Large<br/>- Zero Data Retention Policy<br/>- No Model Retraining"]
     end
 
     subgraph KMSZone ["AWS Key Management Service"]
@@ -188,6 +188,8 @@ flowchart TD
     CleanDoc -->|3. Transit via PrivateLink| PrivateLink
     PrivateLink -->|4. L7 Security Inspection| Guardrails
     Guardrails -->|5. Sovereign Inference| FoundationModel
+    FoundationModel -->|6. Encrypt Analysis Result| KMS
+```
     FoundationModel -->|6. Encrypt Analysis Result| KMS
 ```
 
