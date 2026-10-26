@@ -1,14 +1,15 @@
 """
 Application Use Cases - Orchestration de la Logique Métier
 """
-import uuid
 import time
-from src.domain.models import DocumentEntity, ContractAnalysisResult, TenantContext
+import uuid
+
+from src.domain.models import ContractAnalysisResult, DocumentEntity, TenantContext
 from src.domain.ports import (
-    PiiSanitizerPort,
     AiAgentPort,
-    DocumentRepositoryPort,
     AuditTelemetryPort,
+    DocumentRepositoryPort,
+    PiiSanitizerPort,
 )
 
 

@@ -1,7 +1,6 @@
 """
 Tests Unitaires TDD : Caviardage PII Déterministe Local (0 Token)
 """
-import pytest
 from src.adapters.pii.regex_sanitizer import RegexPiiSanitizerAdapter
 
 

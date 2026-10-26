@@ -1,7 +1,6 @@
 """
 Tests Unitaires TDD : Observabilité OpenTelemetry & FinOps par Tenant
 """
-import pytest
 from src.adapters.telemetry.opentelemetry_adapter import OpenTelemetryAdapter
 
 

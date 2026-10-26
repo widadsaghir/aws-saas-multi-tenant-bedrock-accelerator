@@ -1,13 +1,12 @@
 """
 Tests Unitaires TDD : Cas d'Usage Hexagonal de Bout en Bout
 """
-import pytest
-from src.domain.models import TenantContext, TenantTier
-from src.application.use_cases import AnalyzeContractUseCase
-from src.adapters.pii.regex_sanitizer import RegexPiiSanitizerAdapter
 from src.adapters.ai.bedrock_mcp_adapter import BedrockMcpAdapter
+from src.adapters.pii.regex_sanitizer import RegexPiiSanitizerAdapter
 from src.adapters.repository.in_memory_repository import InMemoryDocumentRepository
 from src.adapters.telemetry.opentelemetry_adapter import OpenTelemetryAdapter
+from src.application.use_cases import AnalyzeContractUseCase
+from src.domain.models import TenantContext, TenantTier
 
 
 def test_analyze_contract_use_case_end_to_end_silo():

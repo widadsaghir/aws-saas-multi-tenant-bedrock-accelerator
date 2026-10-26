@@ -1,8 +1,7 @@
 """
 Tests Unitaires TDD : Modèles du Domaine (DDD)
 """
-import pytest
-from src.domain.models import TenantContext, TenantTier, ContractAnalysisResult, Clause
+from src.domain.models import Clause, ContractAnalysisResult, TenantContext, TenantTier
 
 
 def test_tenant_context_silo_isolation():

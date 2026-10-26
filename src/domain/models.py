@@ -3,10 +3,8 @@ Domain Models - Pure Domain Logic (0 AWS SDK Dependencies)
 Architecture Hexagonale & Domain-Driven Design (DDD)
 """
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from enum import Enum
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-import uuid
 
 
 class TenantTier(str, Enum):
@@ -18,7 +16,7 @@ class TenantTier(str, Enum):
 class TenantContext:
     tenant_id: str
     tier: TenantTier
-    kms_key_arn: Optional[str] = None
+    kms_key_arn: str | None = None
     cost_center: str = "DEFAULT"
 
     def is_isolated_storage(self) -> bool:
@@ -31,7 +29,7 @@ class Clause:
     title: str
     content: str
     risk_level: str = "LOW"  # LOW, MEDIUM, HIGH, CRITICAL
-    compliance_flags: List[str] = field(default_factory=list)
+    compliance_flags: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -40,11 +38,11 @@ class ContractAnalysisResult:
     tenant_id: str
     document_id: str
     overall_risk_score: float  # Entre 0.0 (zéro risque) et 1.0 (risque critique)
-    detected_clauses: List[Clause]
+    detected_clauses: list[Clause]
     requires_human_review: bool
     tokens_consumed: int
     inference_latency_ms: float
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def is_compliant_for_auto_approval(self) -> bool:
         # Règle d'or : score de risque inférieur à 0.15 et pas de flag critique
@@ -57,5 +55,5 @@ class DocumentEntity:
     tenant_context: TenantContext
     filename: str
     raw_content: str
-    sanitized_content: Optional[str] = None
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    sanitized_content: str | None = None
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))

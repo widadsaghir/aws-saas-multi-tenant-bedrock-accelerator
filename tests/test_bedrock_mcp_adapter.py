@@ -1,9 +1,8 @@
 """
 Tests Unitaires TDD : Adaptateur Amazon Bedrock & Protocole MCP
 """
-import pytest
-from src.domain.models import TenantContext, TenantTier
 from src.adapters.ai.bedrock_mcp_adapter import BedrockMcpAdapter
+from src.domain.models import TenantContext, TenantTier
 
 
 def test_bedrock_mcp_detects_high_risk_penalties():

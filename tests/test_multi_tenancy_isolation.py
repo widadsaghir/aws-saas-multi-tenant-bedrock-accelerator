@@ -2,9 +2,8 @@
 Tests Unitaires TDD : Isolation Multi-Tenant Silo vs Pool
 Vérification mathématique de l'absence de fuite cross-tenant
 """
-import pytest
-from src.domain.models import DocumentEntity, TenantContext, TenantTier
 from src.adapters.repository.in_memory_repository import InMemoryDocumentRepository
+from src.domain.models import DocumentEntity, TenantContext, TenantTier
 
 
 def test_silo_tenant_isolation():
@@ -27,7 +26,7 @@ def test_silo_tenant_isolation():
     assert retrieved_a.filename == "dossier_medical_a.pdf"
 
     # 2. Le tenant B NE PEUT PAS accéder au document du tenant A (isolation Silo)
-    leakage_attempt = repo.get_document("doc-a-101", tenant_id="tenant-clinic-b")
+    leakage_attempt = repo.get_document("doc-a-101", tenant_id=tenant_b.tenant_id)
     assert leakage_attempt is None
 
 
@@ -46,7 +45,7 @@ def test_pool_tenant_isolation_with_rls():
     repo.save_document(doc_pme_1)
 
     # 1. Le tenant 1 accède à son document
-    assert repo.get_document("doc-pme-202", tenant_id="tenant-pme-1") is not None
+    assert repo.get_document("doc-pme-202", tenant_id=tenant_pme_1.tenant_id) is not None
 
     # 2. Le tenant 2 est bloqué même dans le pool partagé
-    assert repo.get_document("doc-pme-202", tenant_id="tenant-pme-2") is None
+    assert repo.get_document("doc-pme-202", tenant_id=tenant_pme_2.tenant_id) is None

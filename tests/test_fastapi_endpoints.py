@@ -1,8 +1,8 @@
 """
 Tests des Endpoints REST FastAPI
 """
-import pytest
 from fastapi.testclient import TestClient
+
 from src.infrastructure.fastapi_app import app
 
 client = TestClient(app)

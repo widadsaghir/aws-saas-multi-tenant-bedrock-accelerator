@@ -2,7 +2,8 @@
 OpenTelemetry Adapter - Observabilité Distribuée des Agents IA en Production
 Conforme aux recommandations de Damián Arregui (AWS Summit / AgentCore)
 """
-from typing import Dict, List, Any
+from typing import Any
+
 from src.domain.ports import AuditTelemetryPort
 
 
@@ -14,7 +15,7 @@ class OpenTelemetryAdapter(AuditTelemetryPort):
 
     def __init__(self):
         # Buffer de traces en mémoire pour validation locale et inspection
-        self.recorded_spans: List[Dict[str, Any]] = []
+        self.recorded_spans: list[dict[str, Any]] = []
 
     def record_reasoning_step(
         self,
@@ -34,7 +35,7 @@ class OpenTelemetryAdapter(AuditTelemetryPort):
         }
         self.recorded_spans.append(span)
 
-    def get_spans_for_tenant(self, tenant_id: str) -> List[Dict[str, Any]]:
+    def get_spans_for_tenant(self, tenant_id: str) -> list[dict[str, Any]]:
         return [span for span in self.recorded_spans if span["tenant_id"] == tenant_id]
 
     def get_total_tokens_for_tenant(self, tenant_id: str) -> int:

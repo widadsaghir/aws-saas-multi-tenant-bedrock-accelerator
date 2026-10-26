@@ -3,6 +3,7 @@ Local PII Sanitizer Adapter - Caviardage Déterministe 0 Token
 Conforme au Pattern Zero-Trust Sovereign Air-Gap Sanitizer
 """
 import re
+
 from src.domain.ports import PiiSanitizerPort
 
 

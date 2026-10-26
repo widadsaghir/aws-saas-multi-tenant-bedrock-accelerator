@@ -1,15 +1,16 @@
 """
 FastAPI Inbound Adapter - REST API & Dependency Injection
 """
-from fastapi import FastAPI, HTTPException, Header
+
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
-from typing import Optional, List
-from src.domain.models import TenantContext, TenantTier
-from src.application.use_cases import AnalyzeContractUseCase
-from src.adapters.pii.regex_sanitizer import RegexPiiSanitizerAdapter
+
 from src.adapters.ai.bedrock_mcp_adapter import BedrockMcpAdapter
+from src.adapters.pii.regex_sanitizer import RegexPiiSanitizerAdapter
 from src.adapters.repository.in_memory_repository import InMemoryDocumentRepository
 from src.adapters.telemetry.opentelemetry_adapter import OpenTelemetryAdapter
+from src.application.use_cases import AnalyzeContractUseCase
+from src.domain.models import TenantContext, TenantTier
 
 app = FastAPI(
     title="OmniDoc AWS SaaS Accelerator API",
@@ -29,7 +30,7 @@ class ContractAnalysisRequest(BaseModel):
     filename: str
     raw_content: str
     tier: str = "POOL"  # "SILO" ou "POOL"
-    kms_key_arn: Optional[str] = None
+    kms_key_arn: str | None = None
 
 
 class ContractAnalysisResponse(BaseModel):
@@ -46,7 +47,7 @@ class ContractAnalysisResponse(BaseModel):
 @app.post("/api/v1/contracts/analyze", response_model=ContractAnalysisResponse)
 def analyze_contract_endpoint(
     request: ContractAnalysisRequest,
-    x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-ID")
+    x_tenant_id: str | None = Header(None, alias="X-Tenant-ID")
 ):
     if not x_tenant_id:
         raise HTTPException(status_code=400, detail="Header 'X-Tenant-ID' obligatoire.")

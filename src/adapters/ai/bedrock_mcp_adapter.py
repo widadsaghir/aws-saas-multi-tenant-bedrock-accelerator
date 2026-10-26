@@ -2,10 +2,10 @@
 Amazon Bedrock & Model Context Protocol (MCP) Adapter
 Orchestration d'Inférence IA Souveraine & MCP Tools
 """
-import uuid
 import time
-from typing import List, Optional
-from src.domain.models import ContractAnalysisResult, Clause, TenantContext
+import uuid
+
+from src.domain.models import Clause, ContractAnalysisResult, TenantContext
 from src.domain.ports import AiAgentPort
 
 
@@ -23,13 +23,13 @@ class BedrockMcpAdapter(AiAgentPort):
         self,
         sanitized_content: str,
         tenant_context: TenantContext,
-        tools: List[str]
+        tools: list[str]
     ) -> ContractAnalysisResult:
         start_time = time.time()
         analysis_id = str(uuid.uuid4())
 
         # Détection déterministe des clauses pour les tests et exécution locale
-        detected_clauses: List[Clause] = []
+        detected_clauses: list[Clause] = []
         requires_human_review = False
         overall_risk_score = 0.05
 

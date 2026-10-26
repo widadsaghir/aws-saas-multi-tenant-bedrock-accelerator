@@ -2,8 +2,8 @@
 In-Memory & Dynamic PostgreSQL Repository Adapter
 Modélise l'isolation hybride Silo (schémas dédiés) et Pool (partagé RLS)
 """
-from typing import Dict, Optional
-from src.domain.models import DocumentEntity, ContractAnalysisResult, TenantTier
+
+from src.domain.models import ContractAnalysisResult, DocumentEntity, TenantTier
 from src.domain.ports import DocumentRepositoryPort
 
 
@@ -16,11 +16,11 @@ class InMemoryDocumentRepository(DocumentRepositoryPort):
 
     def __init__(self):
         # Silos isolés : {tenant_id: {doc_id: DocumentEntity}}
-        self.silo_schemas: Dict[str, Dict[str, DocumentEntity]] = {}
+        self.silo_schemas: dict[str, dict[str, DocumentEntity]] = {}
         # Pool partagé : {doc_id: DocumentEntity}
-        self.pool_shared_documents: Dict[str, DocumentEntity] = {}
+        self.pool_shared_documents: dict[str, DocumentEntity] = {}
         # Stockage des analyses
-        self.analyses: Dict[str, ContractAnalysisResult] = {}
+        self.analyses: dict[str, ContractAnalysisResult] = {}
 
     def save_document(self, document: DocumentEntity) -> None:
         tenant_context = document.tenant_context
@@ -36,7 +36,7 @@ class InMemoryDocumentRepository(DocumentRepositoryPort):
     def save_analysis(self, result: ContractAnalysisResult) -> None:
         self.analyses[result.analysis_id] = result
 
-    def get_document(self, document_id: str, tenant_id: str) -> Optional[DocumentEntity]:
+    def get_document(self, document_id: str, tenant_id: str) -> DocumentEntity | None:
         # 1. Vérification dans les silos isolés
         if tenant_id in self.silo_schemas and document_id in self.silo_schemas[tenant_id]:
             return self.silo_schemas[tenant_id][document_id]
@@ -48,5 +48,5 @@ class InMemoryDocumentRepository(DocumentRepositoryPort):
                 return doc
         return None
 
-    def get_analysis(self, analysis_id: str) -> Optional[ContractAnalysisResult]:
+    def get_analysis(self, analysis_id: str) -> ContractAnalysisResult | None:
         return self.analyses.get(analysis_id)

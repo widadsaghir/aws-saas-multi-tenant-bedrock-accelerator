@@ -2,8 +2,8 @@
 Domain Ports - Pure SPI Interfaces for Hexagonal Architecture
 """
 from abc import ABC, abstractmethod
-from typing import Optional, List
-from src.domain.models import DocumentEntity, ContractAnalysisResult, TenantContext
+
+from src.domain.models import ContractAnalysisResult, DocumentEntity, TenantContext
 
 
 class PiiSanitizerPort(ABC):
@@ -20,7 +20,7 @@ class AiAgentPort(ABC):
         self,
         sanitized_content: str,
         tenant_context: TenantContext,
-        tools: List[str]
+        tools: list[str]
     ) -> ContractAnalysisResult:
         pass
 
@@ -36,7 +36,7 @@ class DocumentRepositoryPort(ABC):
         pass
 
     @abstractmethod
-    def get_document(self, document_id: str, tenant_id: str) -> Optional[DocumentEntity]:
+    def get_document(self, document_id: str, tenant_id: str) -> DocumentEntity | None:
         pass
 
 
