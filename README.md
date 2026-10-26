@@ -56,7 +56,7 @@ flowchart TD
         UserSME["Standard Users<br/>(B2B SMEs)"]
     end
 
-    OmniDoc["<b>OmniDoc SaaS Platform</b><br/>Multi-Tenant Document Automation<br/>& Sovereign Agentic AI"]
+    OmniDoc["OmniDoc SaaS Platform<br/>Multi-Tenant Document Automation<br/>& Sovereign Agentic AI"]
 
     subgraph AWS_Cloud [AWS Paris Region (eu-west-3)]
         Bedrock["Amazon Bedrock<br/>Claude 3.5 Sonnet & Guardrails"]
@@ -113,68 +113,78 @@ flowchart TD
 
 ### 3. C3 — Hexagonal Component Architecture (Core Engine)
 ```mermaid
-classDiagram
-    class InboundController {
-        +post_analyze(doc, token)
-    }
+flowchart LR
+    subgraph Inbound ["Inbound Adapters (Driving)"]
+        FastApiCtrl["FastAPI Document Controller<br/>• JWT Tenant Context Validation<br/>• POST /api/v1/contracts/analyze"]
+    end
 
-    class AnalyzeContractUseCase {
-        <<interface>>
-        +execute(cmd) Result
-    }
+    subgraph Core ["Hexagonal Core Domain (Pure Logic - 0 AWS SDK)"]
+        UseCase["AnalyzeContractUseCase<br/>Domain Orchestration Engine"]
+        Aggregate["ContractAggregate<br/>Domain Entity & Risk Evaluation"]
+        TenantVO["TenantContext (Value Object)<br/>• tenant_id<br/>• tier (SILO / POOL)<br/>• kms_key_arn"]
+        Policy["RiskEvaluationPolicy<br/>Rule: Risk < 15% -> Auto Approval"]
+    end
 
-    class ContractAggregate {
-        -contract_id: UUID
-        -tenant_context: TenantContext
-        -clauses: List~Clause~
-        +evaluate_risks() RiskScore
-    }
+    subgraph Ports ["Driven SPI Ports (Interfaces)"]
+        PiiPort["PiiSanitizerPort<br/>&lt;&lt;interface&gt;&gt;"]
+        AiPort["AiAgentPort<br/>&lt;&lt;interface&gt;&gt;"]
+        RepoPort["DocumentRepositoryPort<br/>&lt;&lt;interface&gt;&gt;"]
+        OtelPort["AuditTelemetryPort<br/>&lt;&lt;interface&gt;&gt;"]
+    end
 
-    class TenantContext {
-        +tenant_id: str
-        +tier: TenantTier
-        +kms_key_arn: str
-    }
+    subgraph Outbound ["Outbound Adapters (Driven AWS Integrations)"]
+        SanitizerAdapter["RegexPiiSanitizerAdapter<br/>Deterministic Local 0-Token Engine"]
+        BedrockAdapter["BedrockMcpAdapter<br/>Claude 3.5 & MCP Tool Runner"]
+        AuroraAdapter["InMemory / AuroraPostgresAdapter<br/>• Silo: Dedicated Schema<br/>• Pool: Shared Table RLS"]
+        OtelAdapter["OpenTelemetryAdapter<br/>• Distributed Reasoning Spans<br/>• FinOps Tenant Cost Attribution"]
+    end
 
-    class AiAgentPort {
-        <<interface>>
-        +analyze_document(content, tenant, tools)
-    }
+    FastApiCtrl -->|1. Invoque| UseCase
+    UseCase --> Aggregate
+    Aggregate --> TenantVO
+    Aggregate --> Policy
+    UseCase -->|2. Sanitize| PiiPort
+    UseCase -->|3. Inférence IA| AiPort
+    UseCase -->|4. Persistance| RepoPort
+    UseCase -->|5. Observabilité| OtelPort
 
-    class DocumentRepositoryPort {
-        <<interface>>
-        +save_document(doc)
-        +save_analysis(result)
-    }
+    PiiPort -.->|Implémente| SanitizerAdapter
+    AiPort -.->|Implémente| BedrockAdapter
+    RepoPort -.->|Implémente| AuroraAdapter
+    OtelPort -.->|Implémente| OtelAdapter
+```
 
-    class AuditTelemetryPort {
-        <<interface>>
-        +record_reasoning_step(step, duration, tokens)
-    }
+### 4. C4 — Security & Sovereign Enclave Diagram (Zero-Trust Bedrock)
+```mermaid
+flowchart TD
+    subgraph ClientZone ["Client Boundary"]
+        RawDoc["Raw Sensitive Contract<br/>(Healthcare Data / NIR / PII / Legal)"]
+    end
 
-    class BedrockMcpAdapter {
-        +pii_sanitizer: RegexPiiSanitizerAdapter
-        +analyze_document()
-    }
+    subgraph EKSPod ["Isolated Amazon EKS Pod (Private VPC eu-west-3)"]
+        Sanitizer["Local PII Sanitizer<br/>Deterministic Regex 0-Token Engine<br/>• Masks French NIR, IBAN, Phone, Email"]
+        CleanDoc["Sanitized Payload<br/>[PII_NIR_REDACTED] & Pseudonyms"]
+    end
 
-    class AuroraPostgresAdapter {
-        +save_document()
-    }
+    subgraph Network ["AWS Private Backbone (Zero Public Internet Transit)"]
+        PrivateLink["AWS PrivateLink Interface VPC Endpoint<br/>Private DNS (eu-west-3)"]
+    end
 
-    class OpenTelemetryAdapter {
-        +record_reasoning_step()
-    }
+    subgraph SovereignEnclave ["Amazon Bedrock Sovereign Enclave (Paris)"]
+        Guardrails["Bedrock Guardrails<br/>• Anti-Prompt Injection<br/>• PII Leak Prevention<br/>• Content Filtering"]
+        FoundationModel["Claude 3.5 Sonnet / Mistral Large<br/>• Zero Data Retention Policy<br/>• No Model Retraining"]
+    end
 
-    InboundController --> AnalyzeContractUseCase : Driving
-    AnalyzeContractUseCase <|.. ContractAggregate : Core Logic
-    ContractAggregate *-- TenantContext : Domain VO
-    ContractAggregate --> AiAgentPort : SPI Port
-    ContractAggregate --> DocumentRepositoryPort : SPI Port
-    ContractAggregate --> AuditTelemetryPort : SPI Port
+    subgraph KMSZone ["AWS Key Management Service"]
+        KMS["Dedicated Tenant CMK<br/>Envelope Encryption at Rest"]
+    end
 
-    AiAgentPort <|.. BedrockMcpAdapter : Driven Adapter
-    DocumentRepositoryPort <|.. AuroraPostgresAdapter : Driven Adapter
-    AuditTelemetryPort <|.. OpenTelemetryAdapter : Driven Adapter
+    RawDoc -->|1. Ingestion| Sanitizer
+    Sanitizer -->|2. Zero-Token Redaction| CleanDoc
+    CleanDoc -->|3. Transit via PrivateLink| PrivateLink
+    PrivateLink -->|4. L7 Security Inspection| Guardrails
+    Guardrails -->|5. Sovereign Inference| FoundationModel
+    FoundationModel -->|6. Encrypt Analysis Result| KMS
 ```
 
 ---
@@ -185,7 +195,8 @@ classDiagram
 aws-saas-multi-tenant-bedrock-accelerator/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml               # Automated CI pipeline (Ruff + Pytest TDD)
+│       └── ci.yml               # Automated CI pipeline (GitHub Actions)
+├── .gitlab-ci.yml               # Automated CI pipeline (GitLab CI/CD)
 ├── diagrams/                    # PlantUML, Mermaid & Draw.io source diagrams
 ├── src/
 │   ├── domain/                  # Pure Business Logic (0 Cloud Dependencies)
@@ -233,18 +244,25 @@ pytest tests/ -v --cov=src --cov-report=term-missing
 
 Sample output:
 ```text
+tests/test_bedrock_mcp_adapter.py::test_bedrock_mcp_detects_high_risk_penalties PASSED
+tests/test_bedrock_mcp_adapter.py::test_bedrock_mcp_detects_compliant_standard_clauses PASSED
 tests/test_domain_models.py::test_tenant_context_silo_isolation PASSED
+tests/test_domain_models.py::test_tenant_context_pool_shared PASSED
 tests/test_domain_models.py::test_contract_analysis_auto_approval_policy PASSED
-tests/test_pii_sanitizer.py::test_pii_sanitizer_masks_french_nir PASSED
+tests/test_fastapi_endpoints.py::test_analyze_contract_endpoint_success PASSED
+tests/test_fastapi_endpoints.py::test_analyze_contract_endpoint_missing_tenant_header PASSED
+tests/test_hexagonal_use_case.py::test_analyze_contract_use_case_end_to_end_silo PASSED
 tests/test_multi_tenancy_isolation.py::test_silo_tenant_isolation PASSED
 tests/test_multi_tenancy_isolation.py::test_pool_tenant_isolation_with_rls PASSED
-tests/test_bedrock_mcp_adapter.py::test_bedrock_mcp_detects_high_risk_penalties PASSED
 tests/test_opentelemetry_tracing.py::test_opentelemetry_records_reasoning_spans PASSED
-tests/test_hexagonal_use_case.py::test_analyze_contract_use_case_end_to_end_silo PASSED
-tests/test_fastapi_endpoints.py::test_analyze_contract_endpoint_success PASSED
+tests/test_opentelemetry_tracing.py::test_opentelemetry_isolates_metrics_across_tenants PASSED
+tests/test_pii_sanitizer.py::test_pii_sanitizer_masks_french_nir_security_number PASSED
+tests/test_pii_sanitizer.py::test_pii_sanitizer_masks_iban PASSED
+tests/test_pii_sanitizer.py::test_pii_sanitizer_masks_email_and_phone PASSED
+tests/test_pii_sanitizer.py::test_pii_sanitizer_handles_empty_or_clean_text PASSED
 
-======================== 12 passed in 0.85s ========================
-TOTAL COVERAGE: 100%
+======================== 16 passed in 0.88s ========================
+TOTAL COVERAGE: 96%
 ```
 
 ---
