@@ -190,8 +190,6 @@ flowchart TD
     Guardrails -->|5. Sovereign Inference| FoundationModel
     FoundationModel -->|6. Encrypt Analysis Result| KMS
 ```
-    FoundationModel -->|6. Encrypt Analysis Result| KMS
-```
 
 ---
 
