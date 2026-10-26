@@ -7,6 +7,10 @@
 [![Architecture](https://img.shields.io/badge/Design-Hexagonal_Ports_%26_Adapters-purple?style=for-the-badge)](#architecture-patterns)
 [![Test Coverage](https://img.shields.io/badge/Coverage-100%25_TDD_(0_Token)-brightgreen?style=for-the-badge)](#testing--verification)
 
+<p align="center">
+  <img src="diagrams/social_preview_1280x640.png" alt="AWS SaaS Multi-Tenant Bedrock Accelerator Social Preview" width="100%">
+</p>
+
 ---
 
 ## 📌 Executive Summary
